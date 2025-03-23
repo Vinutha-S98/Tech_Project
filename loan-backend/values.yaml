@@ -1,0 +1,14 @@
+replicaCount: 1
+
+image:
+  repository: 060795935107.dkr.ecr.eu-north-1.amazonaws.com/loan_management_backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8000
+  nodePort: 30090
+
+imagePullSecrets:
+  - name: ecr-registry-secret

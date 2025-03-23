@@ -1,0 +1,13 @@
+<h2>Add a Loan</h2>
+<form (ngSubmit)="createLoan()">
+  <label>Borrower Name:</label>
+  <input type="text" [(ngModel)]="borrowerName" name="borrowerName" required />
+
+  <label>Repayment Amount:</label>
+  <input type="number" [(ngModel)]="repaymentAmount" name="repaymentAmount" required />
+
+  <label>Funding Amount:</label>
+  <input type="number" [(ngModel)]="fundingAmount" name="fundingAmount" required />
+
+  <button type="submit">Submit</button>
+</form>

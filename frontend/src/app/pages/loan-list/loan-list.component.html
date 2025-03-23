@@ -1,0 +1,17 @@
+<h2>Loan List</h2>
+<table>
+  <tr>
+    <th>Loan ID</th>
+    <th>Borrower Name</th>
+    <th>Repayment Amount</th>
+    <th>Funding Amount</th>
+    <th>Action</th>
+  </tr>
+  <tr *ngFor="let loan of loans">
+    <td>{{ loan.loan_id }}</td>
+    <td>{{ loan.borrower_name }}</td>
+    <td>{{ loan.repayment_amount }}</td>
+    <td>{{ loan.funding_amount }}</td>
+    <td><button (click)="deleteLoan(loan.loan_id)">Delete</button></td>
+  </tr>
+</table>

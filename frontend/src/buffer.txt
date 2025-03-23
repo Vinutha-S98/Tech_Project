@@ -1,0 +1,339 @@
+### File: main.ts
+```
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent, appConfig)
+  .catch((err) => console.error(err));
+
+```
+
+### File: index.html
+```
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Test</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>
+
+```
+
+### File: styles.scss
+```
+/* You can add global styles to this file, and also import other style files */
+
+```
+
+### File: app/app.component.spec.ts
+```
+import { TestBed } from '@angular/core/testing';
+import { AppComponent } from './app.component';
+
+describe('AppComponent', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AppComponent],
+    }).compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
+  });
+
+  it(`should have the 'test' title`, () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    expect(app.title).toEqual('test');
+  });
+
+  it('should render title', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, test');
+  });
+});
+
+```
+
+### File: app/app.component.ts
+```
+import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterModule],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss'
+})
+export class AppComponent {
+  title = 'test';
+}
+
+```
+
+### File: app/app.component.scss
+```
+
+```
+
+### File: app/app.routes.ts
+```
+import { Routes } from '@angular/router';
+import { LoanListComponent } from './pages/loan-list/loan-list.component';
+import { LoanFormComponent } from './pages/loan-form/loan-form.component';
+
+export const routes: Routes = [
+  { path: '', component: LoanListComponent },
+  { path: 'new', component: LoanFormComponent }
+];
+
+```
+
+### File: app/app.config.ts
+```
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideHttpClient()
+  ]
+};
+
+```
+
+### File: app/app.component.html
+```
+<nav>
+  <a routerLink="/">Loan List</a>
+  <a routerLink="/new">Add Loan</a>
+</nav>
+<router-outlet />
+
+
+```
+
+### File: app/pages/loan-form/loan-form.component.ts
+```
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { LoanService } from '../../services/loan.service';
+
+@Component({
+  selector: 'app-loan-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './loan-form.component.html',
+  styleUrls: ['./loan-form.component.css']
+})
+export class LoanFormComponent {
+  borrowerName = '';
+  repaymentAmount = 0;
+  fundingAmount = 0;
+
+  constructor(private loanService: LoanService) {}
+
+  createLoan() {
+    const newLoan = {
+      borrower_name: this.borrowerName,
+      repayment_amount: this.repaymentAmount,
+      funding_amount: this.fundingAmount
+    };
+    this.loanService.createLoan(newLoan).subscribe(() => {
+      alert('Loan created successfully!');
+    });
+  }
+}
+
+```
+
+### File: app/pages/loan-form/loan-form.component.css
+```
+form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  input {
+    margin-bottom: 10px;
+    padding: 5px;
+  }
+  
+  button {
+    background-color: blue;
+    color: white;
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  
+```
+
+### File: app/pages/loan-form/loan-form.component.html
+```
+<h2>Add a Loan</h2>
+<form (ngSubmit)="createLoan()">
+  <label>Borrower Name:</label>
+  <input type="text" [(ngModel)]="borrowerName" name="borrowerName" required />
+
+  <label>Repayment Amount:</label>
+  <input type="number" [(ngModel)]="repaymentAmount" name="repaymentAmount" required />
+
+  <label>Funding Amount:</label>
+  <input type="number" [(ngModel)]="fundingAmount" name="fundingAmount" required />
+
+  <button type="submit">Submit</button>
+</form>
+
+```
+
+### File: app/pages/loan-list/loan-list.component.html
+```
+<h2>Loan List</h2>
+<table>
+  <tr>
+    <th>Loan ID</th>
+    <th>Borrower Name</th>
+    <th>Repayment Amount</th>
+    <th>Funding Amount</th>
+    <th>Action</th>
+  </tr>
+  <tr *ngFor="let loan of loans">
+    <td>{{ loan.loan_id }}</td>
+    <td>{{ loan.borrower_name }}</td>
+    <td>{{ loan.repayment_amount }}</td>
+    <td>{{ loan.funding_amount }}</td>
+    <td><button (click)="deleteLoan(loan.loan_id)">Delete</button></td>
+  </tr>
+</table>
+
+```
+
+### File: app/pages/loan-list/loan-list.component.ts
+```
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LoanService } from '../../services/loan.service';
+import { Loan } from '../../models/loan';
+
+@Component({
+  selector: 'app-loan-list',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './loan-list.component.html',
+  styleUrls: ['./loan-list.component.css']
+})
+export class LoanListComponent implements OnInit {
+  loans: Loan[] = [];
+
+  constructor(private loanService: LoanService) {}
+
+  ngOnInit() {
+    this.loadLoans();
+  }
+
+  loadLoans() {
+    this.loanService.getAllLoans().subscribe((data: Loan[]) => {
+      this.loans = data;
+    });
+  }
+
+  deleteLoan(id: string) {
+    this.loanService.deleteLoan(id).subscribe(() => {
+      this.loadLoans();
+    });
+  }
+}
+
+```
+
+### File: app/pages/loan-list/loan-list.component.css
+```
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 8px;
+    border: 1px solid black;
+  }
+  
+  button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+  }
+  
+```
+
+### File: app/service/loan.service.ts
+```
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Loan } from '../models/loan';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LoanService {
+  private apiUrl = 'http://localhost:8000'; // Matches the FastAPI backend's default port
+
+  constructor(private http: HttpClient) {}
+
+  createLoan(loan: Omit<Loan, 'loan_id'>): Observable<Loan> {
+    return this.http.post<Loan>(`${this.apiUrl}/loans/`, loan);
+  }
+
+  getLoan(loanId: string): Observable<Loan> {
+    return this.http.get<Loan>(`${this.apiUrl}/loans/${loanId}`);
+  }
+
+  getLoansByBorrower(borrowerName: string): Observable<Loan[]> {
+    return this.http.get<Loan[]>(`${this.apiUrl}/borrower/${borrowerName}`);
+  }
+
+  deleteLoan(loanId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/loans/${loanId}`);
+  }
+
+  getAllLoans(): Observable<Loan[]> {
+    return this.http.get<Loan[]>(`${this.apiUrl}/loans/`);
+  }
+}
+
+```
+
+### File: app/models/loan.ts
+```
+export interface Loan {
+  loan_id: string;
+  borrower_name: string;
+  repayment_amount: number;
+  funding_amount: number;
+}
+
+```
+
